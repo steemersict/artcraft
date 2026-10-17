@@ -18,6 +18,32 @@ bestaande fal-pad werkt alleen voor **beeld**, en ook dat heeft nog hun server n
 (token → CDN-URL) en bij voltooiing (`handle_fal_complete` eist login en uploadt het resultaat naar
 hun server).
 
+## Bouwstatus (fase 0)
+
+Getest op 2026-10-17, MacBook M1 met 8 GB RAM.
+
+| Onderdeel         | Resultaat                                                                                 |
+|-------------------|-------------------------------------------------------------------------------------------|
+| Toolchain         | Rust 1.99.1 (rustup), Node v26.8.1 (docs noemen v24, v26 werkt), tauri-cli 2.12.3          |
+| `cargo build`     | `SQLX_OFFLINE=true cargo build -p artcraft -j 2` lukt in 4m16s, alleen waarschuwingen     |
+| `unix_dev.sh`     | Lukt. Bouwt opnieuw (andere RUSTFLAGS) en start het venster. Vite draait op 127.0.0.1:5193 |
+| Schijfruimte      | `target/` is na beide builds ongeveer 8 tot 16 GB. Houd minimaal 20 GB vrij              |
+| `npm install`     | Lukt. npm 11 slaat install-scripts over (o.a. esbuild); Vite werkte toch                  |
+
+Zonder login: de app start en maakt `~/Artcraft/` aan. Daarna gebeurt het volgende:
+
+- **Server-aanroepen falen.** `storyteller_task_polling_thread` krijgt `Unauthorized` van `api.storyteller.ai`.
+- **Kostenschattingen vragen hun server.** De app roept direct `/v1/omni_gen/cost/image` aan.
+- **Discord.** De Discord-thread probeert elke 10 seconden te verbinden.
+- **Loginvenster.** Volgens de code opent dan het loginvenster dat je niet kunt sluiten. Visueel heb ik dat niet gecontroleerd.
+
+Starten:
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
+CARGO_BUILD_JOBS=2 ./script/artcraft/unix_dev.sh
+```
+
 ## Overzicht per functie
 
 Legenda omvang: **S** is minder dan een halve dag, **M** is 1 tot 2 dagen, **L** is 3 tot 5 dagen
